@@ -22,6 +22,16 @@ app.use(express.static(path.join(__dirname, "public")));
 //   res.sendFile(path.join(__dirname, "index.html"));
 // });
 
+io.on("connection", (socket) => {
+  console.log("A user connected.");
+  // Emitting message to the client
+  socket.emit("messageFromServer", "Hello from server");
+  // Listening message from the client
+  socket.on("messageFromClient", (data) => {
+    console.log(data);
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`Server running: http://localhost:${PORT}`);
 });
