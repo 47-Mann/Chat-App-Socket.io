@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 */
 const app = express();
 const server = http.createServer(app); // Bridge between express & socket.io
-const io = new Server(server);
+const io = new Server(server); // From socket.io library, we create a new instance of the Server class and pass the HTTP server as an argument. This allows Socket.IO to listen for WebSocket connections on the same server that is handling HTTP requests.
 
 const PORT = process.env.PORT || 3000;
 
