@@ -35,6 +35,7 @@ io.on("connection", (socket) => {
   // Listening message from the client
   socket.on("messageFromClient", (data) => {
     console.log(data);
+    socket.broadcast.emit("messageFromServer", data); // --> Broadcast to all clients except the sender
   });
 });
 
