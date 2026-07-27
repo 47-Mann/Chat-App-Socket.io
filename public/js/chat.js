@@ -6,8 +6,9 @@ const input = document.querySelector("#messageInput");
 
 /**
  * Append a message to the chat message area.
- * @param {string} message - The text content to display.
- * @param {string} sender - Identifier for the sender used to apply CSS (e.g. "client" or "server").
+ *
+ * string message - The text content to display.
+ * string sender - Identifier for the sender used to apply CSS (e.g. "client" or "server").
  *
  * Creates a new <div>, sets its classes to include the sender-specific class,
  * sets the text content, appends it to the message container, and scrolls
@@ -16,7 +17,7 @@ const input = document.querySelector("#messageInput");
 function addMessage(message, sender) {
   if (!messageArea) return;
   const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${sender}-message`;
+  messageDiv.className = `message ${sender}-message`; // --> Add sender-specific class for styling
   messageDiv.textContent = message;
   messageArea.appendChild(messageDiv);
   messageArea.scrollTop = messageArea.scrollHeight;
