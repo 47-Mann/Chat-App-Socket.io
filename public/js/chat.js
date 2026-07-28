@@ -33,6 +33,30 @@ socket.on("messageFromServer", (message) => {
   addMessage(message, "server");
 });
 
+// Acknowledgement handling:
+// - The server will emit `messageAck` back to the original sender only
+//   to confirm it received the message. The client listens for that event
+//   and displays the acknowledgement as a server-styled message.
+socket.on("messageAck", (ack) => {
+  // Instead of inserting the acknowledgement text into the message area
+  // (which would show "Server received: ..."), mark the last message
+  // sent by this client as acknowledged. This keeps the message area
+  // free of ack text while still providing a delivery indicator.
+  if (!messageArea) return;
+  const clientMessages = messageArea.querySelectorAll(
+    ".message.client-message",
+  );
+  if (clientMessages.length > 0) {
+    const lastClientMsg = clientMessages[clientMessages.length - 1];
+    lastClientMsg.classList.add("delivered");
+    // store ack metadata (optional) for future UI use
+    lastClientMsg.dataset.ack = new Date().toISOString();
+  } else {
+    // fallback: log ack to console
+    console.log("ACK:", ack);
+  }
+});
+
 /**
  * Read the value from the input, emit it to the server, and display it
  * locally in the chat area.
@@ -40,15 +64,24 @@ socket.on("messageFromServer", (message) => {
  * - Emits `messageFromClient` to the server via the socket.
  */
 function sendMessage() {
-  if (!input) return;
+  if (!input) return; // defensive programming pattern, return early if input is not found in the DOM.
+
   const message = input.value.trim();
   if (!message) return;
   if (socket && typeof socket.emit === "function") {
     socket.emit("messageFromClient", message);
   }
-  addMessage(message, "client");
-  input.value = "";
 }
 
 // Bind the click handler to the send button if it exists in the DOM.
 if (sendBtn) sendBtn.addEventListener("click", sendMessage);
+
+socket.on("greeting", (message, callBack) => {
+  console.log(message);
+
+  callBack({
+    status: "received",
+    time: new Date(),
+    message: message,
+  });
+});

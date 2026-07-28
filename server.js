@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import http from "http"; // --> For creating server
 import { Server } from "socket.io";
 import path from "path"; // --> For serving static file in "public" folder
@@ -32,10 +32,21 @@ io.on("connection", (socket) => {
   console.log("A user connected.");
   // Emitting message to the client
   socket.emit("messageFromServer", "Hello from server");
+  // Acknowledgement logic:
+  // - When a client sends `messageFromClient`, the server broadcasts that
+  //   message to all other clients and also sends an acknowledgement back
+  //   to the original sender only. The acknowledgement confirms the server
+  //   received the message and can include metadata (timestamp, status,
+  //   original text, etc.). This ack is delivered via the `messageAck` event.
   // Listening message from the client
   socket.on("messageFromClient", (data) => {
     console.log(data);
     socket.broadcast.emit("messageFromServer", data); // --> Broadcast to all clients except the sender
+    // Send an acknowledgement back to the sender only
+    socket.emit("messageAck", `Server received: ${data}`);
+  });
+  socket.emit("greeting", "Hi from Server", (res) => {
+    console.log("Client has received the message", res);
   });
 });
 
