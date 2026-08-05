@@ -80,6 +80,16 @@ function sendMessage() {
 // Bind the click handler to the send button if it exists in the DOM.
 if (sendBtn) sendBtn.addEventListener("click", sendMessage);
 
+// Allow pressing Enter inside the input to send the message.
+if (input) {
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+}
+
 socket.on("greeting", (message, callBack) => {
   console.log(message);
 
