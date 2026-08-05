@@ -43,7 +43,10 @@ io.on("connection", (socket) => {
     console.log(data);
     socket.broadcast.emit("messageFromServer", data); // --> Broadcast to all clients except the sender
     // Send an acknowledgement back to the sender only
-    socket.emit("messageAck", `Server received: ${data}`);
+    socket.emit("messageAck", {
+      status: "received",
+      original: data,
+    });
   });
   socket.emit("greeting", "Hi from Server", (res) => {
     console.log("Client has received the message", res);

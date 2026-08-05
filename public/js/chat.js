@@ -3,22 +3,40 @@ const socket = io();
 const sendBtn = document.querySelector(".send-button");
 const messageArea = document.getElementById("messageArea");
 const input = document.querySelector("#messageInput");
+const usernameDisplay = document.getElementById("usernameDisplay");
+
+const username = (() => {
+  const entered = prompt("Enter your name:", "Anonymous");
+  return entered && entered.trim() ? entered.trim() : "Anonymous";
+})();
+
+if (usernameDisplay) {
+  usernameDisplay.textContent = username;
+}
 
 /**
  * Append a message to the chat message area.
  *
  * string message - The text content to display.
- * string sender - Identifier for the sender used to apply CSS (e.g. "client" or "server").
- *
- * Creates a new <div>, sets its classes to include the sender-specific class,
- * sets the text content, appends it to the message container, and scrolls
- * the container to the bottom so the new message is visible.
+ * string sender - Identifier for the sender used to apply CSS (e.g. "me", "other", or "server").
+ * string name - Optional display name for the message sender.
  */
-function addMessage(message, sender) {
+function addMessage(message, sender, name) {
   if (!messageArea) return;
   const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${sender}-message`; // --> Add sender-specific class for styling
-  messageDiv.textContent = message;
+  messageDiv.className = `message ${sender}-message`;
+
+  if (name) {
+    const senderName = document.createElement("span");
+    senderName.className = "sender-name";
+    senderName.textContent = name;
+    messageDiv.appendChild(senderName);
+  }
+
+  const textNode = document.createElement("div");
+  textNode.textContent = message;
+  messageDiv.appendChild(textNode);
+
   messageArea.appendChild(messageDiv);
   messageArea.scrollTop = messageArea.scrollHeight;
 }
@@ -26,11 +44,14 @@ function addMessage(message, sender) {
 /**
  * Handle messages emitted from the server.
  * The server emits the `messageFromServer` event; when received, display
- * the message using `addMessage` with the sender set to "server" so styles
- * and alignment are applied accordingly.
+ * the message as another client's message so styles and alignment are applied.
  */
-socket.on("messageFromServer", (message) => {
-  addMessage(message, "server");
+socket.on("messageFromServer", (payload) => {
+  if (payload && typeof payload === "object") {
+    addMessage(payload.message, "other", payload.name || "Unknown");
+  } else {
+    addMessage(payload, "server", "Server");
+  }
 });
 
 // Acknowledgement handling:
@@ -43,9 +64,7 @@ socket.on("messageAck", (ack) => {
   // sent by this client as acknowledged. This keeps the message area
   // free of ack text while still providing a delivery indicator.
   if (!messageArea) return;
-  const clientMessages = messageArea.querySelectorAll(
-    ".message.client-message",
-  );
+  const clientMessages = messageArea.querySelectorAll(".message.me-message");
   if (clientMessages.length > 0) {
     const lastClientMsg = clientMessages[clientMessages.length - 1];
     lastClientMsg.classList.add("delivered");
@@ -69,11 +88,14 @@ function sendMessage() {
   const message = input.value.trim();
   if (!message) return;
 
-  addMessage(message, "client");
+  addMessage(message, "me", username);
   input.value = "";
 
   if (socket && typeof socket.emit === "function") {
-    socket.emit("messageFromClient", message);
+    socket.emit("messageFromClient", {
+      name: username,
+      message,
+    });
   }
 }
 
