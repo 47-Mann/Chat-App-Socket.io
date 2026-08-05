@@ -68,6 +68,10 @@ function sendMessage() {
 
   const message = input.value.trim();
   if (!message) return;
+
+  addMessage(message, "client");
+  input.value = "";
+
   if (socket && typeof socket.emit === "function") {
     socket.emit("messageFromClient", message);
   }
