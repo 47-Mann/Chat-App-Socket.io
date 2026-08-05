@@ -21,7 +21,7 @@ if (usernameDisplay) {
  * string sender - Identifier for the sender used to apply CSS (e.g. "me", "other", or "server").
  * string name - Optional display name for the message sender.
  */
-function addMessage(message, sender, name) {
+function addMessage(message, sender, name, timestamp) {
   if (!messageArea) return;
   const messageDiv = document.createElement("div");
   messageDiv.className = `message ${sender}-message`;
@@ -37,6 +37,13 @@ function addMessage(message, sender, name) {
   textNode.textContent = message;
   messageDiv.appendChild(textNode);
 
+  if (timestamp) {
+    const timeNode = document.createElement("span");
+    timeNode.className = "timestamp";
+    timeNode.textContent = timestamp;
+    messageDiv.appendChild(timeNode);
+  }
+
   messageArea.appendChild(messageDiv);
   messageArea.scrollTop = messageArea.scrollHeight;
 }
@@ -48,11 +55,23 @@ function addMessage(message, sender, name) {
  */
 socket.on("messageFromServer", (payload) => {
   if (payload && typeof payload === "object") {
-    addMessage(payload.message, "other", payload.name || "Unknown");
+    addMessage(
+      payload.message,
+      "other",
+      payload.name || "Unknown",
+      payload.timestamp || formatTime(new Date()),
+    );
   } else {
-    addMessage(payload, "server", "Server");
+    addMessage(payload, "server", "Server", formatTime(new Date()));
   }
 });
+
+function formatTime(date) {
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 // Acknowledgement handling:
 // - The server will emit `messageAck` back to the original sender only
@@ -88,13 +107,15 @@ function sendMessage() {
   const message = input.value.trim();
   if (!message) return;
 
-  addMessage(message, "me", username);
+  const timestamp = formatTime(new Date());
+  addMessage(message, "me", username, timestamp);
   input.value = "";
 
   if (socket && typeof socket.emit === "function") {
     socket.emit("messageFromClient", {
       name: username,
       message,
+      timestamp,
     });
   }
 }

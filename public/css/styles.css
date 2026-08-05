@@ -28,6 +28,14 @@
   margin-bottom: 4px;
 }
 
+.message .timestamp {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+  text-align: right;
+}
+
 .server-message,
 .other-message {
   background-color: #e3f2fd;
