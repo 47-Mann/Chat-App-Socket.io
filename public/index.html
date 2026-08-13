@@ -8,18 +8,33 @@
   </head>
   <body>
     <div class="chat-container">
-      <h1>Socket.IO Chat</h1>
+      <header class="chat-header">
+        <h1>Socket.IO Chat</h1>
+        <p class="subtitle">A small realtime demo — be kind, say hello 👋</p>
+      </header>
+
       <div class="username-bar">
         You are: <span id="usernameDisplay">Anonymous</span>
       </div>
-      <div class="messages" id="messageArea"></div>
+
+      <div
+        class="messages"
+        id="messageArea"
+        role="log"
+        aria-live="polite"
+      ></div>
+
       <div class="input-container">
         <input
           type="text"
           id="messageInput"
           placeholder="Type your message..."
+          aria-label="Message input"
+          autofocus
         />
-        <button class="send-button">Send</button>
+        <button type="button" class="send-button" aria-label="Send message">
+          Send
+        </button>
       </div>
     </div>
 

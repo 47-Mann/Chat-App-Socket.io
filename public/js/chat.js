@@ -25,6 +25,8 @@ function addMessage(message, sender, name, timestamp) {
   if (!messageArea) return;
   const messageDiv = document.createElement("div");
   messageDiv.className = `message ${sender}-message`;
+  // subtle entrance animation
+  messageDiv.classList.add("fade-in");
 
   if (name) {
     const senderName = document.createElement("span");
@@ -45,7 +47,12 @@ function addMessage(message, sender, name, timestamp) {
   }
 
   messageArea.appendChild(messageDiv);
-  messageArea.scrollTop = messageArea.scrollHeight;
+  // smooth scroll to bottom for new messages
+  if (messageArea.scrollTo) {
+    messageArea.scrollTo({ top: messageArea.scrollHeight, behavior: "smooth" });
+  } else {
+    messageArea.scrollTop = messageArea.scrollHeight;
+  }
 }
 
 /**
@@ -131,6 +138,16 @@ if (input) {
       sendMessage();
     }
   });
+  // give keyboard users immediate focus and a nicer typing experience
+  input.addEventListener("focus", () => {
+    input.select();
+  });
+  // attempt to focus input on load
+  try {
+    input.focus();
+  } catch (e) {
+    /* ignore */
+  }
 }
 
 socket.on("greeting", (message, callBack) => {
