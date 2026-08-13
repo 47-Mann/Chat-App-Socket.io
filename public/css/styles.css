@@ -7,8 +7,10 @@
   box-shadow: 0 8px 30px rgba(12, 35, 64, 0.12);
 }
 
+.\/* -----------------------------
+  Base / Layout
+  ----------------------------- *\/
 body {
-  font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     Arial;
   margin: 0;
@@ -16,7 +18,9 @@ body {
   background: linear-gradient(180deg, #f3f6fb 0%, #e9eef6 100%);
   color: #1f2937;
 }
-
+.\/* -----------------------------
+   Header
+   ----------------------------- *\/
 .chat-header h1 {
   margin: 0 0 4px 0;
   font-size: 1.35rem;
@@ -28,6 +32,9 @@ body {
   color: #4b5563;
 }
 
+.\/* -----------------------------
+  Messages list
+  ----------------------------- *\/
 .messages {
   height: 360px;
   overflow-y: auto;
@@ -41,6 +48,9 @@ body {
   gap: 6px;
 }
 
+.\/* -----------------------------
+  Message bubble
+  ----------------------------- *\/
 .message {
   display: inline-block;
   max-width: 78%;
@@ -72,6 +82,11 @@ body {
   margin-left: 8px;
 }
 
+.\/* -----------------------------
+   Message types: server / other / me
+   Styles below provide distinct colors and alignment for
+   system messages, other users, and this client.
+   ----------------------------- *\/
 .server-message {
   background: #fff7e6;
   color: #7a5a00;
@@ -101,6 +116,9 @@ body {
   margin-left: 6px;
 }
 
+.\/* -----------------------------
+   Input area
+   ----------------------------- *\/
 .username-bar {
   margin-bottom: 8px;
   color: #374151;

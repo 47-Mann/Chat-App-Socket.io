@@ -1,3 +1,5 @@
+// Initialize the Socket.IO client connection. `io()` is provided by
+// the `/socket.io/socket.io.js` script included in the HTML.
 const socket = io();
 
 const sendBtn = document.querySelector(".send-button");
@@ -17,9 +19,10 @@ if (usernameDisplay) {
 /**
  * Append a message to the chat message area.
  *
- * string message - The text content to display.
- * string sender - Identifier for the sender used to apply CSS (e.g. "me", "other", or "server").
- * string name - Optional display name for the message sender.
+ * message: string - The text content to display.
+ * sender: string  - Identifier used to apply CSS ("me", "other", or "server").
+ * name: string   - Optional display name for the sender.
+ * timestamp: string - Optional formatted time string to show.
  */
 function addMessage(message, sender, name, timestamp) {
   if (!messageArea) return;
@@ -28,6 +31,7 @@ function addMessage(message, sender, name, timestamp) {
   // subtle entrance animation
   messageDiv.classList.add("fade-in");
 
+  // If caller provided a sender name, show it above the message text.
   if (name) {
     const senderName = document.createElement("span");
     senderName.className = "sender-name";
@@ -39,6 +43,7 @@ function addMessage(message, sender, name, timestamp) {
   textNode.textContent = message;
   messageDiv.appendChild(textNode);
 
+  // If a timestamp was provided, show a compact time label.
   if (timestamp) {
     const timeNode = document.createElement("span");
     timeNode.className = "timestamp";
@@ -47,7 +52,7 @@ function addMessage(message, sender, name, timestamp) {
   }
 
   messageArea.appendChild(messageDiv);
-  // smooth scroll to bottom for new messages
+  // Smooth-scroll to the bottom so new messages are visible.
   if (messageArea.scrollTo) {
     messageArea.scrollTo({ top: messageArea.scrollHeight, behavior: "smooth" });
   } else {
@@ -60,6 +65,9 @@ function addMessage(message, sender, name, timestamp) {
  * The server emits the `messageFromServer` event; when received, display
  * the message as another client's message so styles and alignment are applied.
  */
+// Server messages arrive here. The server usually sends an object with
+// { name, message, timestamp } but we tolerate plain strings for simple
+// system notices.
 socket.on("messageFromServer", (payload) => {
   if (payload && typeof payload === "object") {
     addMessage(
@@ -69,10 +77,12 @@ socket.on("messageFromServer", (payload) => {
       payload.timestamp || formatTime(new Date()),
     );
   } else {
+    // Plain string -> system/server message
     addMessage(payload, "server", "Server", formatTime(new Date()));
   }
 });
 
+// Helper to format a Date into a short, locale-aware time string.
 function formatTime(date) {
   return date.toLocaleTimeString([], {
     hour: "2-digit",
@@ -84,6 +94,10 @@ function formatTime(date) {
 // - The server will emit `messageAck` back to the original sender only
 //   to confirm it received the message. The client listens for that event
 //   and displays the acknowledgement as a server-styled message.
+// The server sends a `messageAck` back to the original sender to confirm
+// the message was received and (optionally) processed. We mark the
+// last `me-message` element as delivered and attach an ISO timestamp
+// to its `data-ack` for potential future UI features.
 socket.on("messageAck", (ack) => {
   // Instead of inserting the acknowledgement text into the message area
   // (which would show "Server received: ..."), mark the last message
@@ -150,9 +164,13 @@ if (input) {
   }
 }
 
+// Example of a server-initiated event which also demonstrates the
+// acknowledgement/callback pattern where the server expects a response
+// from the client. This is optional and used here for demonstration.
 socket.on("greeting", (message, callBack) => {
   console.log(message);
 
+  // Reply to the server's callback to confirm receipt.
   callBack({
     status: "received",
     time: new Date(),
